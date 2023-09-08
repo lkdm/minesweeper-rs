@@ -1,26 +1,36 @@
+// Field enum and FieldData struct and their implementation are a simple finite state machine.
+
+#[derive(Debug, Clone, Copy)]
+struct FieldData {
+    has_mine: bool,
+    adjacent_mines: u8,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum Field {
-    // The only way to change a Field's state is to flag, reveal or unflag it.
-    Unrevealed,
-    Flagged,
-    Revealed(u8),
-    Mine,
+    Unrevealed(FieldData),
+    Revealed(FieldData),
+    Flagged(FieldData)
 }
 
 impl Field {
+    pub fn new(has_mine: bool, adjacent_mines: u8) -> Field {
+        Field::Unrevealed(FieldData {
+            has_mine,
+            adjacent_mines,
+        })
+    }
     pub fn flag(&mut self) {
         match self {
-            Field::Unrevealed => *self = Field::Flagged,
-            Field::Flagged => *self = Field::Unrevealed,
-            _ => (),
+            Field::Unrevealed(fdata) => *self = Field::Flagged(*fdata),
+            Field::Flagged(fdata) => *self = Field::Unrevealed(*fdata),
+            _ => {}
         }
     }
-    pub fn reveal(&mut self, adjacent_mines: u8) {
+    pub fn reveal(&mut self) {
         match self {
-            Field::Unrevealed => *self = Field::Revealed(adjacent_mines),
-            Field::Flagged => *self = Field::Revealed(adjacent_mines),
-            Field::Revealed(_) => (),
-            Field::Mine => (),
+            Field::Unrevealed(fdata) => *self = Field::Revealed(*fdata),
+            _ => {}
         }
     }
 }
