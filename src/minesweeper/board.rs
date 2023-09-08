@@ -50,4 +50,38 @@ impl Board {
             height,
         }
     }
+
+    pub fn flag(&mut self, x: usize, y: usize) {
+        // Flag a field.
+        self.fields[y][x].flag();
+    }
+
+    pub fn reveal(&mut self, x: usize, y: usize) {
+        // Reveal a field, and if it has no adjacent mines, reveal all adjacent fields.
+        let field = &mut self.fields[y][x];
+        match field {
+            Field::Revealed(_) => return,
+            Field::Unrevealed(fdata) | Field::Flagged(fdata) => {
+                // How do I reveal field here?
+                field.reveal();
+
+                if field.has_mine() {
+                    // If the field has a mine, the game is lost.
+                    return;
+                }
+
+                // Check adjacent fields and recursively reveal them if needed.
+                for &(dx, dy) in &[(1, 0), (-1, 0), (0, 1), (0, -1)] {
+                    let new_x = x.wrapping_add(dx as usize);
+                    let new_y = y.wrapping_add(dy as usize);
+
+                    // Check if the new coordinates are within bounds.
+                    if new_x < self.width && new_y < self.height {
+                        // Recursively reveal adjacent fields.
+                        self.reveal(new_x, new_y);
+                    }
+                }
+            }
+        }
+    }
 }

@@ -1,9 +1,9 @@
 // Field enum and FieldData struct and their implementation are a simple finite state machine.
 
 #[derive(Debug, Clone, Copy)]
-struct FieldData {
-    has_mine: bool,
-    adjacent_mines: u8,
+pub struct FieldData {
+    pub has_mine: bool,
+    pub adjacent_mines: u8,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -27,10 +27,19 @@ impl Field {
             _ => {}
         }
     }
+    // If the field is revealed, do nothing and return None. Else, reveal the field, and return the field data.
     pub fn reveal(&mut self) {
         match self {
             Field::Unrevealed(fdata) => *self = Field::Revealed(*fdata),
-            _ => {}
+            Field::Flagged(fdata) => *self = Field::Revealed(*fdata),
+            _ => {},
+        }
+    }
+
+    pub fn has_mine(&self) -> bool {
+        match self {
+            Field::Revealed(fdata) => fdata.has_mine,
+            _ => false,
         }
     }
 }
