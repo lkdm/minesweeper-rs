@@ -107,5 +107,13 @@ impl Minesweeper {
 
         Some(field)
     }
+
+    pub fn flag(&mut self, pos: Position) {
+        if self.flagged_fields.contains(&pos) {
+            self.flagged_fields.remove(&pos);
+        } else {
+            self.flagged_fields.insert(pos);
+        }
+    }
 }
 
