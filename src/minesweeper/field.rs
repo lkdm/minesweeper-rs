@@ -1,45 +1,60 @@
 // Field enum and FieldData struct and their implementation are a simple finite state machine.
 
 #[derive(Debug, Clone, Copy)]
-pub struct FieldData {
-    pub has_mine: bool,
-    pub adjacent_mines: u8,
+pub enum FieldState {
+    Closed,
+    Open,
+    Flagged
 }
 
 #[derive(Debug, Clone, Copy)]
 pub enum Field {
-    Unrevealed(FieldData),
-    Revealed(FieldData),
-    Flagged(FieldData)
+    Number {
+        state: FieldState,
+        count: u8,
+    },
+    Mine {
+        state: FieldState,
+    }
 }
+
 
 impl Field {
     pub fn new(has_mine: bool, adjacent_mines: u8) -> Field {
-        Field::Unrevealed(FieldData {
-            has_mine,
-            adjacent_mines,
-        })
-    }
-    pub fn flag(&mut self) {
-        match self {
-            Field::Unrevealed(fdata) => *self = Field::Flagged(*fdata),
-            Field::Flagged(fdata) => *self = Field::Unrevealed(*fdata),
-            _ => {}
-        }
-    }
-    // If the field is revealed, do nothing and return None. Else, reveal the field, and return the field data.
-    pub fn reveal(&mut self) {
-        match self {
-            Field::Unrevealed(fdata) => *self = Field::Revealed(*fdata),
-            Field::Flagged(fdata) => *self = Field::Revealed(*fdata),
-            _ => {},
+        if has_mine {
+            Field::Mine {
+                state: FieldState::Closed,
+            }
+        } else {
+            Field::Number {
+                state: FieldState::Closed,
+                count: adjacent_mines,
+            }
         }
     }
 
-    pub fn has_mine(&self) -> bool {
+    pub fn flag(&mut self) {
         match self {
-            Field::Revealed(fdata) => fdata.has_mine,
-            _ => false,
+            Field::Number { state, .. } | Field::Mine { state } => {
+                match state {
+                    FieldState::Closed => *state = FieldState::Flagged,
+                    FieldState::Flagged => *state = FieldState::Closed,
+                    FieldState::Open => {}
+                }
+            }
         }
     }
+
+    pub fn open(&mut self) {
+        match self {
+            Field::Number { state, .. } | Field::Mine { state } => {
+                match state {
+                    FieldState::Closed => *state = FieldState::Open,
+                    FieldState::Flagged => {}
+                    FieldState::Open => {}
+                }
+            }
+        }
+    }
+
 }

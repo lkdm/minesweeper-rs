@@ -1,12 +1,8 @@
 mod minesweeper;
-use minesweeper::game::Game;
+use minesweeper::board::Board;
 
 fn main() {
-    let mut game = Game::new(10, 10, 1);
+    let mut board = Board::make_board(10, 10, 15);
 
-    game.reveal(0, 0);
-    game.reveal(1, 0);
-    game.reveal(2, 0);
-    game.reveal(3, 0);
-    print!("{:#?}", game);
+    print!("{:#?}", board);
 }
