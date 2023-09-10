@@ -1,11 +1,8 @@
-use std::{
-    collections::HashSet,
-    fmt::{Display, Write},
-  };
+use std::collections::HashSet;
 use rand::Rng;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-enum Field {
+pub enum Field {
     Mine,
     NoMine(u8)
 }
@@ -14,14 +11,16 @@ pub type Position = (usize, usize);
 
 #[derive(Debug)]
 pub struct Minesweeper {
+    // board, width, and height are generated at the start of the game and never changed
     board: Vec<Vec<Field>>,
     width: usize,
     height: usize,
+    // open_fields and flagged_fields are updated during the game
     open_fields: HashSet<Position>,
     flagged_fields: HashSet<Position>
 }
 
-pub fn iter_neighbours(
+fn iter_neighbours(
     width: usize,
     height: usize,
     (x, y): Position

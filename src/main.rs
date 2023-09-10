@@ -1,8 +1,7 @@
 mod minesweeper;
-use minesweeper::board::Board;
+use minesweeper::Minesweeper;
 
 fn main() {
-    let mut board = Board::make_board(10, 10, 10);
-
-    print!("{:#?}", board);
+    let mut minesweeper = Minesweeper::new(10, 10, 10);
+    print!("{:#?}", minesweeper);
 }
