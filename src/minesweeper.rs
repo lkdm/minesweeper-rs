@@ -1,6 +1,15 @@
 use std::collections::HashSet;
 use rand::Rng;
 
+#[derive(Debug, PartialEq)]
+pub enum GameState {
+    NotReady,
+    Ready,
+    Playing,
+    Won,
+    Lost
+}
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Field {
     Mine,
@@ -15,9 +24,11 @@ pub struct Minesweeper {
     board: Vec<Vec<Field>>,
     width: usize,
     height: usize,
+    mine_count: usize,
     // open_fields and flagged_fields are updated during the game
     open_fields: HashSet<Position>,
-    flagged_fields: HashSet<Position>
+    flagged_fields: HashSet<Position>,
+    game_state: GameState
 }
 
 fn iter_neighbours(
@@ -76,18 +87,22 @@ impl Minesweeper {
             board,
             width,
             height,
+            mine_count,
             open_fields: HashSet::new(),
             flagged_fields: HashSet::new(),
+            game_state: GameState::NotReady
         }
     }
 
-    pub fn adjacent_mines(&self, pos: Position) -> u8 {
-        iter_neighbours(self.width, self.height, pos)
-            .filter(|&neighbor_pos| self.board[neighbor_pos.1][neighbor_pos.0] == Field::Mine)
-            .count() as u8
-    }
-
+    /**
+     * Open a field. If the field is a mine, the game is lost.
+     */
     pub fn open(&mut self, pos: Position) -> Option<Field> {
+        // Guard; If the game is not in the playing state, do nothing
+        if self.game_state != GameState::Playing {
+            return None;
+        }
+        // Guard; If the field is already open, do nothing
         if self.open_fields.contains(&pos) {
             return None;
         }
@@ -104,10 +119,26 @@ impl Minesweeper {
                 });
         }
 
+        // If the field is a mine, the game is lost
+        if let Field::Mine = field {
+            self.game_state = GameState::Lost;
+        }
+
+        // If the number of closed fields is equal to the number of mines, the game is won
+        if self.open_fields.len() == self.width * self.height - self.mine_count {
+            self.game_state = GameState::Won;
+        }
+
         Some(field)
     }
 
+    /**
+     * Flag a field. If the field is already flagged, unflag it.
+     */
     pub fn flag(&mut self, pos: Position) {
+        if self.game_state != GameState::Playing {
+            return;
+        }
         if self.flagged_fields.contains(&pos) {
             self.flagged_fields.remove(&pos);
         } else {
